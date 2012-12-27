@@ -1,0 +1,149 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!DOCTYPE agent SYSTEM 'C:\Program Files (x86)\IBM\Lotus\Notes\xmlschemas/domino_8_0_2.dtd'>
+<agent name='Export 2 Filesystem' xmlns='http://www.lotus.com/dxl' version='8.0'
+ maintenanceversion='2.0' replicaid='C125668F004CEEC2' hide='v3' noreplace='true'
+ publicaccess='false' designerversion='8'>
+<noteinfo noteid='1251e' unid='B6FE079F9DBB4542C1257AE1005AABE4' sequence='45'>
+<created><datetime>20121227T173022,44+01</datetime></created>
+<modified><datetime>20121227T194029,29+01</datetime></modified>
+<revised><datetime>20121227T194029,28+01</datetime></revised>
+<lastaccessed><datetime>20121227T194029,26+01</datetime></lastaccessed>
+<addedtofile><datetime>20121227T174806,89+01</datetime></addedtofile></noteinfo>
+<updatedby><name>CN=Matthias Reining/O=nobisCum</name></updatedby>
+<wassignedby><name>CN=Matthias Reining/O=nobisCum</name></wassignedby>
+<designchange><datetime>20121227T194029,25+01</datetime></designchange>
+<trigger type='actionsmenu'/>
+<documentset type='runonce'/><code event='options'><lotusscript>Option Public
+Option Declare
+
+</lotusscript></code><code event='initialize'><lotusscript>Sub Initialize
+	Dim session As NotesSession
+	Dim db As NotesDatabase
+	Dim view As NotesView
+	Dim doc As NotesDocument
+	Dim counter As Integer
+	
+	Set session = New NotesSession
+	Set db = session.CurrentDatabase
+	Set view = db.GetView("($All)")
+	
+	
+	counter = 0
+	Set doc = view.GetFirstDocument
+	Do Until (doc Is Nothing)
+		If (doc.GetItemValue("Form")(0)) = "Memo" Then
+			counter = counter +1 
+			Call exportMail(doc)
+		End If
+		
+		'If (counter &gt; 15) Then Exit Sub
+		
+		Set doc = view.GetNextDocument(doc)
+	Loop
+	
+	
+End Sub
+</lotusscript></code><code event='exportMail'><lotusscript>Private Sub exportMail(doc As NotesDocument)
+	
+	Dim fileNum As Integer
+	Dim fileName As String
+	
+	Dim timeText As String
+	Dim sender As String
+	Dim text As String
+	
+	Dim exportFolderRoot As String
+	Dim rtitem As NotesRichTextItem
+	
+	exportFolderRoot = "F:\My Mail\nobiscum\notes\"
+	
+	
+	Set rtItem = doc.getFirstItem("Body")
+	
+	
+	fileNum% = Freefile()
+	
+	Dim sendTime As NotesDateTime
+	If (doc.DeliveredDate(0) &lt;&gt; "") Then
+		Set sendTime = doc.getFirstItem("DeliveredDate").DateTimeValue
+	Elseif (doc.PostedDate(0) &lt;&gt; "") Then
+		Set sendTime = doc.getFirstItem("PostedDate").DateTimeValue
+	Else
+		'draft
+		Exit Sub
+	End If
+	
+	
+	
+	timeText$ = Format(sendTime.LSLocalTime, "yyyy-mm-dd hhmmss")
+	
+	If (doc.INetFrom(0) &lt;&gt; "") Then 
+		sender$ = "from " &amp; doc.INetFrom(0)
+	Else
+		sender$ = "from " &amp; doc.from(0)
+	End If
+	
+	If (  Instr(1, sender$, "Reining", 1) &gt; 0 ) Then
+		If (doc.INetSendTo(0) &lt;&gt; "") Then 
+			sender$ = "to " &amp; doc.getFirstItem("INetSendTo").text
+		Else
+			sender$ = "to " &amp;  doc.getFirstItem("sendTo").text
+		End If	
+	End If
+	sender$ = StripIllegalChar(sender$)
+	
+	filename$ = timeText$ &amp; " " &amp; StripIllegalChar(doc.subject(0)) &amp; " (" &amp; sender$ &amp; ")"
+	filename$ = Left(filename, 100) 'cut off, to long throws exception
+	
+	
+	Open exportFolderRoot$ &amp; filename$ &amp; ".txt" For Output As fileNum%
+	Print #fileNum%, "Von:        " &amp; doc.From(0) 
+	
+	Print #fileNum%, "Gesendet:   " &amp; Format(sendTime.LSLocalTime, "Long Date") &amp; " " &amp; Format(sendTime.LSLocalTime, "Short Time")
+	Print #fileNum%, "To:         " &amp; doc.getFirstItem("SendTo").Text
+	If (doc.CopyTo(0) &lt;&gt; "" ) Then	Print #fileNum%, "CC:         " &amp; doc.getFirstItem("CopyTo").Text
+	If (doc.BlindCopyTo(0) &lt;&gt; "" ) Then	Print #fileNum%, "BCC:        " &amp; doc.getFirstItem("BlindCopyTo").Text	
+	Print #fileNum%, "Betreff:    " &amp; doc.subject(0) 
+	Print #fileNum%, ""
+	Print #fileNum%, ""
+	Print #fileNum%,  rtItem.GetFormattedText(False, 0)
+	
+	
+	Close fileNum%
+	
+	
+	
+	If ( rtitem.Type = RICHTEXT ) Then
+		If (Not (Isempty( rtitem.EmbeddedObjects ) ) ) Then
+			
+			
+			Forall o In rtitem.EmbeddedObjects
+				If ( o.Type = EMBED_ATTACHMENT ) Then
+					Call o.ExtractFile(exportFolderRoot$ &amp; filename$ &amp; "_" &amp; o.Source )
+				End If
+			End Forall
+		End If
+	End If
+	
+	
+End Sub
+</lotusscript></code><code event='StripIllegalChar'><lotusscript>Function StripIllegalChar(StrInput As String)
+	
+	Dim RegX            As Variant
+	
+	Set RegX = CreateObject("vbscript.regexp")
+	
+	RegX.Pattern = "[\" &amp; Chr(34) &amp; "\!\#\$\%\^\&amp;\*\(\)\=\+\|\[\]\{\}\`\'\;\:\&lt;\&gt;\?\/\,]"
+	RegX.IgnoreCase = True
+	RegX.Global = True
+	
+	StripIllegalChar = RegX.Replace(StrInput, "")
+	
+ExitFunction:
+	
+	Set RegX = Nothing
+	
+End Function</lotusscript></code>
+<rundata processeddocs='0' exitcode='0'>
+<agentmodified><datetime>20121227T194029,25+01</datetime></agentmodified></rundata></agent>
+
