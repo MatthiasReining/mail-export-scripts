@@ -3,18 +3,20 @@
 <agent name='Export 2 Filesystem' xmlns='http://www.lotus.com/dxl' version='8.0'
  maintenanceversion='2.0' replicaid='C125668F004CEEC2' hide='v3' noreplace='true'
  publicaccess='false' designerversion='8'>
-<noteinfo noteid='1251e' unid='B6FE079F9DBB4542C1257AE1005AABE4' sequence='45'>
+<noteinfo noteid='1251e' unid='B6FE079F9DBB4542C1257AE1005AABE4' sequence='50'>
 <created><datetime>20121227T173022,44+01</datetime></created>
-<modified><datetime>20121227T194029,29+01</datetime></modified>
-<revised><datetime>20121227T194029,28+01</datetime></revised>
-<lastaccessed><datetime>20121227T194029,26+01</datetime></lastaccessed>
+<modified><datetime>20121227T194713,18+01</datetime></modified>
+<revised><datetime>20121227T194713,17+01</datetime></revised>
+<lastaccessed><datetime>20121227T194713,17+01</datetime></lastaccessed>
 <addedtofile><datetime>20121227T174806,89+01</datetime></addedtofile></noteinfo>
 <updatedby><name>CN=Matthias Reining/O=nobisCum</name></updatedby>
 <wassignedby><name>CN=Matthias Reining/O=nobisCum</name></wassignedby>
-<designchange><datetime>20121227T194029,25+01</datetime></designchange>
+<designchange><datetime>20121227T194713,15+01</datetime></designchange>
 <trigger type='actionsmenu'/>
 <documentset type='runonce'/><code event='options'><lotusscript>Option Public
 Option Declare
+
+
 
 </lotusscript></code><code event='initialize'><lotusscript>Sub Initialize
 	Dim session As NotesSession
@@ -36,6 +38,7 @@ Option Declare
 			Call exportMail(doc)
 		End If
 		
+		If (counter Mod 100 = 0) Then Print counter% &amp; " mails exported"
 		'If (counter &gt; 15) Then Exit Sub
 		
 		Set doc = view.GetNextDocument(doc)
@@ -44,6 +47,7 @@ Option Declare
 	
 End Sub
 </lotusscript></code><code event='exportMail'><lotusscript>Private Sub exportMail(doc As NotesDocument)
+	On Error Resume Next
 	
 	Dim fileNum As Integer
 	Dim fileName As String
@@ -144,6 +148,11 @@ ExitFunction:
 	Set RegX = Nothing
 	
 End Function</lotusscript></code>
-<rundata processeddocs='0' exitcode='0'>
-<agentmodified><datetime>20121227T194029,25+01</datetime></agentmodified></rundata></agent>
+<rundata processeddocs='0' exitcode='0' agentdata='A650028BB3F3F6D3C1257AE100673618'>
+<agentmodified><datetime>20121227T194713,18+01</datetime></agentmodified>
+<agentrun><datetime>20121227T195829,60+01</datetime></agentrun>
+<runlog>Agent 'Export 2 Filesystem' wurde am 27.12.2012 19:47:20 gestartet
+LotusScript Code ausgeführt
+Agent 'Export 2 Filesystem' wurde am 27.12.2012 19:58:29 beendet
+</runlog></rundata></agent>
 
